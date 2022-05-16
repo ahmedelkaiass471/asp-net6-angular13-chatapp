@@ -1,0 +1,143 @@
+<!-- <div style="text-align: center; margin-top: 200px">
+  <button
+    (click)="initiateRecording()"
+    class="btn btn-primary"
+    *ngIf="!recording"
+    style="
+      cursor: pointer;
+      background-color: green;
+      color: white;
+      font-size: 40px;
+    "
+  >
+    Start Recording
+  </button>
+  <button
+    (click)="stopRecording()"
+    class="btn btn-danger"
+    *ngIf="recording"
+    style="
+      cursor: pointer;
+      background-color: red;
+      color: white;
+      font-size: 40px;
+    "
+  >
+    Stop Recording
+  </button>
+  <audio controls="" *ngIf="url">
+    <source [src]="sanitize(url)" type="audio/wav" />
+  </audio>
+</div> -->
+<div class="wrapper">
+  <ul class="users">
+    <li>Connections</li>
+    <li class="user" *ngFor="let user of frinds" (click)="onSelectFrind(user)">
+      <div class="d-flex align-items-start conttact">
+        <ngx-avatars
+          [name]="user.userName"
+          class="d-inline-block"
+        ></ngx-avatars>
+        <div class="info px-1 d-flex">
+          <span class="username">
+            {{ user.userName }}
+          </span>
+          <span class="last-message"> hello ahmed , r u there </span>
+        </div>
+      </div>
+    </li>
+  </ul>
+  <ul class="users">
+    <li>Chats</li>
+    <li
+      class="user"
+      *ngFor="let _chat of chats"
+      (click)="joinRoom(_chat.id); setReciverUserId(_chat.users[0]?.user?.id)"
+      [class.unreaded]="_chat._hasUnReadedMsg"
+    >
+      <div class="d-flex align-items-start conttact">
+        <ngx-avatars
+          [name]="_chat.users[0]?.user?.userName"
+          class="d-inline-block"
+        ></ngx-avatars>
+        <div class="info px-1 d-flex">
+          <span class="username">
+            {{ _chat.users[0]?.user?.userName }}
+          </span>
+          <span class="last-message"> {{ _chat._unReadedMsgText }} </span>
+        </div>
+        <span *ngIf="_chat._unReadedMsgCount > 0" class="unreaded-messages">{{
+          _chat._unReadedMsgCount
+        }}</span>
+      </div>
+    </li>
+  </ul>
+  <div class="chat-box" #messagesBox (scroll)="onScroll($event)">
+    <div class="chat-messages">
+      <div
+        class="message d-flex"
+        *ngFor="let message of messages; let i = index"
+        [ngClass]="{
+          'by-me': message.isByMe,
+          other: !message.isByMe
+        }"
+      >
+        <ngx-avatars
+          size="30"
+          [name]="message.name"
+          class="d-inline-block avatar"
+          *ngIf="message.userId != messages[i - 1]?.userId"
+        ></ngx-avatars>
+        <!-- <span>{{ message.name }}</span> -->
+        <span
+          class="d-flex message-text"
+          [ngClass]="{
+            'mx-1': message.userId == messages[i - 1]?.userId,
+            'text-message-only': message.userId == messages[i - 1]?.userId
+          }"
+        >
+          <span class="content">{{ message.text }} </span>
+          <ng-container *ngIf="message.files">
+            <!-- <audio
+              controls
+              *ngFor="let file of message.files"
+              class="chat-file"
+            >
+              <source
+                [src]="'https://localhost:44314/' + file"
+                type="audio/wav"
+              />
+              Your browser does not support the audio element.
+            </audio> -->
+            <app-audio-player *ngFor="let file of message.files"  [relativeFilePath]="file"></app-audio-player>
+
+          </ng-container>
+
+          <small class="date">{{ message.ago }}</small>
+        </span>
+      </div>
+    </div>
+    <form
+      [formGroup]="mesageForm"
+      (ngSubmit)="sendMessage()"
+      class="messageForm d-flex align-items-center"
+    >
+      <i
+        class="fa-solid fa-microphone recorder"
+        (click)="initiateRecording()"
+        *ngIf="!recording"
+      ></i>
+      <i
+        class="fa-solid fa-stop recorder"
+        (click)="stopRecording()"
+        *ngIf="recording"
+      ></i>
+      <input
+        type="text"
+        class="form-control chat-input rounded-0"
+        formControlName="message"
+      />
+      <button class="btn btn-primary rounded-0">Send</button>
+    </form>
+  </div>
+</div>
