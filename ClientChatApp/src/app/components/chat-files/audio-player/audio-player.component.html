@@ -1,18 +1,22 @@
 <div class="audio-player">
   <div class="timeline" #timeLine (click)="onTimeLineClick()">
-    <div class="progress"></div>
+    <div
+      class="progress"
+      [ngStyle]="{
+        width: currentTimeRatioToPlay + '%'
+      }"
+    ></div>
   </div>
   <div class="controls">
     <div class="play-container">
-      <div class="toggle-play play" (click)="audio.play()">
-    </div>
+      <div class="toggle-play play" (click)="audio.play()"></div>
     </div>
     <div class="time">
-      <div class="current">0:00</div>
+      <div class="current">{{currntTime||'00:00'}}</div>
       <div class="divider">/</div>
-      <div class="length">{{audioLength}}</div>
+      <div class="length">{{ audioLength }}</div>
     </div>
-    <div class="name">Music Song</div>
+    <!-- <div class="name">Music Song</div> -->
     <div class="volume-container">
       <div class="volume-button">
         <div class="volume icono-volumeMedium"></div>

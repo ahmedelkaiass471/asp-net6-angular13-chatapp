@@ -1,62 +1,58 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from "@angular/core";
 
 @Component({
-  selector: 'app-audio-player',
-  templateUrl: './audio-player.component.html',
-  styleUrls: ['./audio-player.component.scss'],
+  selector: "app-audio-player",
+  templateUrl: "./audio-player.component.html",
+  styleUrls: ["./audio-player.component.scss"],
 })
 export class AudioPlayerComponent implements OnInit {
-  @Input('relativeFilePath')
+  @Input("relativeFilePath")
   relativeFilePath: string | null = null;
-  @ViewChild('timeLine')
+  @ViewChild("timeLine")
   timeLine: ElementRef | null = null;
 
+  currentTimeRatioToPlay:number=0;
+  currntTime:string='00:00';
   public audio = new Audio();
   audioLength: any;
 
   constructor() {}
-  ngOnInit(): void {
-this.audio.src = `https://localhost:44314/${this.relativeFilePath}`;
+  async ngOnInit() {
+    this.audio.src = `https://localhost:44314/${this.relativeFilePath}`;
+    // this.audio.load();
     this.audio.addEventListener(
-      'loadedmetadata',
-      () => {
-        // this.audioLength = this.getTimeCodeFromNum(this.audio.duration);
+      "loadedmetadata",
+      async () => {
         this.audio.volume = 0.85;
-        console.log( this.audioLength= this.audio.buffered.length
-          )
-
+        while (this.audio.duration === Infinity) {
+          await new Promise((r) => setTimeout(r, 100));
+          this.audio.currentTime = 10000000 * Math.random();
+        }
+        this.audio.currentTime = 0;
+        this.audioLength = Math.round(this.audio.duration);
       },
       false
     );
-    this.audio.addEventListener('play', (e) => {
-      console.log(e);
+   
+    this.audio.addEventListener("timeupdate", (e) => {
+      this.currntTime=Math.round(this.audio.currentTime).toFixed(2)
+      this.currentTimeRatioToPlay= (this.audio.currentTime / this.audioLength)*100;
+
     });
-
-  }
-  getTimeCodeFromNum(num: any) {
-    let seconds = parseInt(num);
-    let minutes = seconds / 60;
-    seconds -= minutes * 60;
-    const hours = minutes / 60;
-    minutes -= hours * 60;
-
-    if (hours === 0) return `${minutes}:${String(seconds % 60).padStart(2)}`;
-    return `${String(hours).padStart(2)}:${minutes}:${String(
-      seconds % 60
-    ).padStart(2)}`;
   }
   onTimeLineClick() {
-    // const timeline = this.timeLine?.nativeElement; //  audioPlayer.querySelector(".timeline");
-    // timeline.addEventListener(
-    //   'click',
-    //   (e: any) => {
-    //     const timelineWidth = window.getComputedStyle(timeline).width;
-    //     const timeToSeek =
-    //       (e.offsetX / parseInt(timelineWidth)) * this.audio.duration;
-    //     this.audio.currentTime = timeToSeek;
-    //   },
-    //   false
-    // );
+    const timeline = this.timeLine?.nativeElement; //  audioPlayer.querySelector(".timeline");
+    timeline.addEventListener(
+      'click',
+      (e: any) => {
+        const timelineWidth = window.getComputedStyle(timeline).width;
+        const timeToSeek =
+          (e.offsetX / parseInt(timelineWidth)) * this.audio.duration;
+        this.audio.currentTime = timeToSeek;
+        this.audio.play()
+      },
+      false
+    );
   }
 
   //click volume slider to change volume

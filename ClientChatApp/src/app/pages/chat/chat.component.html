@@ -109,7 +109,10 @@
               />
               Your browser does not support the audio element.
             </audio> -->
-            <app-audio-player *ngFor="let file of message.files"  [relativeFilePath]="file"></app-audio-player>
+            <ng-container  *ngFor="let file of message.files"  >
+              <app-audio-player *ngIf="file.indexOf('.wav')>-1" [relativeFilePath]="file"></app-audio-player>
+              <img *ngIf="file.indexOf('.wav') <= -1" [src]="'https://localhost:44314/'+file" />
+            </ng-container>
 
           </ng-container>
 
@@ -132,6 +135,7 @@
         (click)="stopRecording()"
         *ngIf="recording"
       ></i>
+      <i class="fa-solid fa-camera mx-1" (click)="imageUploader.click()"></i>
       <input
         type="text"
         class="form-control chat-input rounded-0"
@@ -141,3 +145,4 @@
     </form>
   </div>
 </div>
+<input #imageUploader type="file" class="d-none"   accept="image/*;capture=camera" (change)="sendImage($event)"/>

@@ -1,22 +1,22 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
+import { FormControl, FormGroup, Validators } from "@angular/forms";
+import { Router } from "@angular/router";
 import {
   AuthService,
   Chat,
   Message,
   SendMessageDTO,
   UserDTO,
-} from 'src/app/services/auth.service';
-import { ChatHubService } from 'src/app/services/chat.hub';
-import * as moment from 'moment';
-import 'moment/locale/ar';
-import { DatePipe } from '@angular/common';
+} from "src/app/services/auth.service";
+import { ChatHubService } from "src/app/services/chat.hub";
+import * as moment from "moment";
+import "moment/locale/ar";
+import { DatePipe } from "@angular/common";
 
 @Component({
-  selector: 'app-chat',
-  templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.scss'],
+  selector: "app-chat",
+  templateUrl: "./chat.component.html",
+  styleUrls: ["./chat.component.scss"],
   providers: [DatePipe],
 })
 export class ChatComponent implements OnInit {
@@ -28,7 +28,7 @@ export class ChatComponent implements OnInit {
   error: any;
   //URL of Blob
 
-  @ViewChild('messagesBox', { static: true })
+  @ViewChild("messagesBox", { static: true })
   messagesBox: ElementRef | null = null;
   frinds: UserDTO[] = [];
   chats: Chat[] = [];
@@ -49,7 +49,7 @@ export class ChatComponent implements OnInit {
 
   ngOnInit(): void {
     if (!this._authService.LocalUser()?.token) {
-      this._router.navigate(['/login']);
+      this._router.navigate(["/login"]);
     }
     this._ChatHubService.connect();
     this.getFrinds();
@@ -59,7 +59,7 @@ export class ChatComponent implements OnInit {
   _watchIncommingMessages() {
     this._ChatHubService.OnNewMessage().subscribe((msg) => {
       let chat = this.chats.filter((x) => x.id == msg.chatId)[0];
-      let activeChatId = parseInt(this.mesageForm.get('roomId')?.value || '0');
+      let activeChatId = parseInt(this.mesageForm.get("roomId")?.value || "0");
       if (chat) {
         if (!activeChatId || activeChatId != chat.id) {
           chat._hasUnReadedMsg = true;
@@ -109,15 +109,15 @@ export class ChatComponent implements OnInit {
       if (res) {
         this.chats.splice(0, 0, res);
         this.joinRoom(res.id);
-        this.mesageForm.get('toUserId')?.setValue(user.id);
+        this.mesageForm.get("toUserId")?.setValue(user.id);
       }
     });
   }
   setReciverUserId(reciverId: any) {
-    if (reciverId) this.mesageForm.get('toUserId')?.setValue(reciverId);
+    if (reciverId) this.mesageForm.get("toUserId")?.setValue(reciverId);
   }
   joinRoom(roomId: any) {
-    if (roomId) this.mesageForm.get('roomId')?.setValue(roomId);
+    if (roomId) this.mesageForm.get("roomId")?.setValue(roomId);
     this._ChatHubService.joinSignalRRoom(roomId);
     this._ChatHubService
       .getMessages(roomId, this.messagesPageNumber)
@@ -139,7 +139,7 @@ export class ChatComponent implements OnInit {
     try {
       if (this.messagesBox)
         this.messagesBox.nativeElement.scrollTop =
-          this.messagesBox?.nativeElement.scrollHeight;
+          this.messagesBox?.nativeElement.scrollHeight +10000;
     } catch (err) {}
   }
   sendMessage() {
@@ -147,7 +147,7 @@ export class ChatComponent implements OnInit {
     if (this.mesageForm.valid) {
       let dto: SendMessageDTO = this.mesageForm.value;
       this._ChatHubService.sendMessage(dto).subscribe((res) => {
-        this.mesageForm.get('message')?.setValue('');
+        this.mesageForm.get("message")?.setValue("");
         this.calcMessagesAgo();
         this.scrollToBottom();
       });
@@ -156,7 +156,7 @@ export class ChatComponent implements OnInit {
 
   calcMessagesAgo() {
     let date = moment();
-    date.locale('ar');
+    date.locale("ar");
     this.messages.forEach((m) => {
       date = moment(m.timestamp);
       m.ago = date.fromNow();
@@ -164,7 +164,7 @@ export class ChatComponent implements OnInit {
   }
 
   onScroll($event: any) {
-    let roomId = this.mesageForm.get('roomId')?.value || 0;
+    let roomId = this.mesageForm.get("roomId")?.value || 0;
     // console.log(($event.srcElement as Element).scrollTop);
     if (($event.srcElement as Element).scrollTop <= 50) {
       this.messagesPageNumber += 1;
@@ -207,20 +207,17 @@ export class ChatComponent implements OnInit {
     this._myAudoRecorder?.start();
     this._audioChuncks = [];
 
-    this._myAudoRecorder.addEventListener('dataavailable', (event) => {
+    this._myAudoRecorder.addEventListener("dataavailable", (event) => {
       this._audioChuncks.push(event.data);
     });
 
-    this._myAudoRecorder.addEventListener('stop', () => {
-      debugger;
-      console.log(this._audioChuncks);
+    this._myAudoRecorder.addEventListener("stop", () => {
       const audioBlob = new Blob(this._audioChuncks);
-      this._audioFile = new File([audioBlob], 'recorded.wav', {
+      this._audioFile = new File([audioBlob], "recorded.wav", {
         lastModified: new Date().getTime(),
-        type: 'audio/ogg',
+        type: "audio/ogg",
       });
-      console.log(this._audioFile.size);
-      this.mesageForm.get('files')?.setValue([this._audioFile]);
+      this.mesageForm.get("files")?.setValue([this._audioFile]);
       this.sendMessage();
     });
     // var options = {
@@ -246,6 +243,12 @@ export class ChatComponent implements OnInit {
    * Process Error.
    */
   errorCallback(error: any) {
-    this.error = 'Can not play audio in your browser';
+    this.error = "Can not play audio in your browser";
+  }
+
+  sendImage(e: any) {
+    console.log(e.target.files[0]);
+    this.mesageForm.get("files")?.setValue([e.target.files[0]]);
+    this.sendMessage();
   }
 }
